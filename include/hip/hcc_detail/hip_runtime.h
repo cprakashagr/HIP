@@ -188,17 +188,8 @@ extern int HIP_TRACE_API;
 //#define warpSize hc::__wavesize()
 static constexpr int warpSize = 64;
 
-#define clock_t long long int
-__device__ long long int clock64();
-__device__ clock_t clock();
-
 // abort
 __device__ void abort();
-
-// warp vote function __all __any __ballot
-__device__ int __all(int input);
-__device__ int __any(int input);
-__device__ unsigned long long int __ballot(int input);
 
 #if __HIP_ARCH_GFX701__ == 0
 
@@ -237,8 +228,6 @@ __device__ int __hip_move_dpp(int src, int dpp_ctrl, int row_mask, int bank_mask
 
 __host__ __device__ int min(int arg1, int arg2);
 __host__ __device__ int max(int arg1, int arg2);
-
-__device__ void* __get_dynamicgroupbaseptr();
 
 
 /**
@@ -438,17 +427,6 @@ extern void ihipPostLaunchKernel(const char* kernelName, hipStream_t stream, gri
 #endif  //__HCC_CPP__
 
 /**
- * extern __shared__
- */
-
-// Macro to replace extern __shared__ declarations
-// to local variable definitions
-#define HIP_DYNAMIC_SHARED(type, var) type* var = (type*)__get_dynamicgroupbaseptr();
-
-#define HIP_DYNAMIC_SHARED_ATTRIBUTE
-
-
-/**
  * @defgroup HIP-ENV HIP Environment Variables
  * @{
  */
@@ -565,33 +543,6 @@ extern const __device__ __attribute__((weak)) __hip_builtin_gridDim_t gridDim;
 #define hipGridDim_x gridDim.x
 #define hipGridDim_y gridDim.y
 #define hipGridDim_z gridDim.z
-
-#pragma push_macro("__DEVICE__")
-#define __DEVICE__ extern "C" __device__ __attribute__((always_inline)) \
-  __attribute__((weak))
-
-__DEVICE__ void __device_trap() __asm("llvm.trap");
-
-__DEVICE__ void inline __assert_fail(const char * __assertion,
-                                     const char *__file,
-                                     unsigned int __line,
-                                     const char *__function)
-{
-    // Ignore all the args for now.
-    __device_trap();
-}
-
-extern "C" __device__ __attribute__((noduplicate)) void __syncthreads();
-extern "C" __device__ void *__amdgcn_get_dynamicgroupbaseptr();
-
-// Macro to replace extern __shared__ declarations
-// to local variable definitions
-#define HIP_DYNAMIC_SHARED(type, var) \
-    type* var = (type*)__amdgcn_get_dynamicgroupbaseptr();
-
-#define HIP_DYNAMIC_SHARED_ATTRIBUTE
-
-#pragma push_macro("__DEVICE__")
 
 #include <hip/hcc_detail/math_functions.h>
 
